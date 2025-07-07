@@ -1,0 +1,73 @@
+version: '3.9'
+services:
+  php:
+    build: ./php
+    restart: unless-stopped
+    ports:
+      - "9501:9501"
+      - "2345:2345"
+    privileged: true
+    networks:
+      - webnet
+    volumes:
+      - "./www/:/data/www"
+      - "./logs/php-fpm:/var/log/php-fpm"
+      - "./php/www.conf:/usr/local/etc/php-fpm.d/www.conf"
+      - "./php/supervisord.conf:/etc/supervisor/supervisord.conf"
+      - "./php/supervisor/conf.d:/etc/supervisor/conf.d"
+    command: "supervisord -c /etc/supervisor/supervisord.conf"
+    healthcheck:
+      test: [ "CMD", "pgrep", "supervisord" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+      - "9502:9502"
+    volumes:
+      - "./logs/nginx:/var/log/nginx"
+      - "./nginx/data:/data/nginx/data"
+      - "./nginx/conf.d:/etc/nginx/conf.d"
+      - "./www/:/data/www"
+    depends_on:
+      - php
+    restart: always
+    networks:
+      - webnet
+
+  mysql:
+    image: "mysql:5.7"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "./mysql/conf.d:/etc/mysql/conf.d"
+      - "./mysql/data:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: "zhang520."
+      MYSQL_DATABASE: "wework"
+      MYSQL_USER: "app_user"
+      MYSQL_PASSWORD: "${RANDOM_PASSWORD}"
+    restart: always
+    privileged: true
+    networks:
+      - webnet
+
+  redis:
+    image: "redis:6.2.5"
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./redis/data:/data/redis/data"
+      - "./redis/redis.conf:/etc/redis.conf"
+    command: "redis-server /etc/redis.conf"
+    restart: always
+    privileged: true
+    networks:
+      - webnet
+
+networks:
+  webnet:
+    driver: bridge

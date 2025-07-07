@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e09475bb-a2d1-493b-aff9-03541f6948f3" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/php/supervisor/conf.d/wework-finance.conf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/php/supervisord.conf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/admin/controller/index.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/command/QueueWorker.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/common/model/CompanyConfig.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/common/service/ChatTableCreator.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/common/service/WechatService.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/finance_server.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/job/WechatMediaDownload.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/process/WechatFinanceManager.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/process/WechatFinanceWorker.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/resetter/DbResetter.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/work/controller/QyWechat.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/work/controller/WechatSdkFactory.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/app/work/service/WechatSdkFactory.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/check_swoole_command.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/www/wework/public/weWorkMsgServer.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/php/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/CREDITS" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/EXPERIMENTAL" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/config.m4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/config.w32" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/php_wxwork_finance_sdk.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/wxwork_finance_sdk.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/wxwork_finance_sdk.php" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution>
+      <executable path="composer" />
+    </execution>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="G:\phpstudy_pro\Extensions\php\php7.3.4nts\php.exe" />
+  <component name="ProjectId" id="2yvyLksBdXTTnDhKnLUl1nKPmDt" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "F:/phpstudy_pro/WWW/www.ceshinew.com",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\phpstudy_pro\WWW\wework-msgaudit-php-docker\wework-msgaudit-php-docker\php" />
+      <recent name="F:\phpstudy_pro\WWW\wework-msgaudit-php-docker\wework-msgaudit-php-docker\www\wework\app" />
+      <recent name="F:\phpstudy_pro\WWW\wework-msgaudit-php-docker\wework-msgaudit-php-docker\www\wework" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
+      <deployment type="dockerfile" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="e09475bb-a2d1-493b-aff9-03541f6948f3" name="更改" comment="" />
+      <created>1750729288043</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1750729288043</updated>
+      <workItem from="1750729289131" duration="146804000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
