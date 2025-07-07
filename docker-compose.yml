@@ -13,9 +13,6 @@ services:
       - "./www/:/data/www"
       - "./logs/php-fpm:/var/log/php-fpm"
       - "./php/www.conf:/usr/local/etc/php-fpm.d/www.conf"
-      - "./php/supervisord.conf:/etc/supervisor/supervisord.conf"
-      - "./php/supervisor/conf.d:/etc/supervisor/conf.d"
-    command: "supervisord -c /etc/supervisor/supervisord.conf"
     healthcheck:
       test: [ "CMD", "pgrep", "supervisord" ]
       interval: 10s
