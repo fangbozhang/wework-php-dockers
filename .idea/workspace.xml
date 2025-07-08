@@ -5,36 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e09475bb-a2d1-493b-aff9-03541f6948f3" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/php/supervisor/conf.d/wework-finance.conf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/php/supervisord.conf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/admin/controller/index.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/command/QueueWorker.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/common/model/CompanyConfig.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/common/service/ChatTableCreator.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/common/service/WechatService.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/finance_server.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/job/WechatMediaDownload.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/process/WechatFinanceManager.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/process/WechatFinanceWorker.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/resetter/DbResetter.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/work/controller/QyWechat.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/work/controller/WechatSdkFactory.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/app/work/service/WechatSdkFactory.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/check_swoole_command.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/www/wework/public/weWorkMsgServer.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/php/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/CREDITS" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/EXPERIMENTAL" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/config.m4" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/config.w32" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/php_wxwork_finance_sdk.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/wxwork_finance_sdk.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/php7-wxwork-finance-sdk/wxwork_finance_sdk.php" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +34,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "F:/phpstudy_pro/WWW/www.ceshinew.com",
+    "last_opened_file_path": "F:/phpstudy_pro/WWW/wework-msgaudit-php-docker/wework-php-docker",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -80,7 +52,9 @@
   </component>
   <component name="RunManager">
     <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
-      <deployment type="dockerfile" />
+      <deployment type="dockerfile">
+        <settings />
+      </deployment>
       <method v="2" />
     </configuration>
   </component>
@@ -93,7 +67,16 @@
       <option name="presentableId" value="Default" />
       <updated>1750729288043</updated>
       <workItem from="1750729289131" duration="146804000" />
+      <workItem from="1751880787168" duration="2202000" />
     </task>
+    <task id="LOCAL-00001" summary="测试supervisord">
+      <created>1751880839552</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1751880839552</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -109,5 +92,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="测试supervisord" />
+    <option name="LAST_COMMIT_MESSAGE" value="测试supervisord" />
   </component>
 </project>
