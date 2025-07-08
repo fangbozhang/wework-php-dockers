@@ -10,9 +10,7 @@ class WechatFinanceManager {
         if ($companyIds === null) {
             WechatFinanceWorker::startAllWorkers($server);
         } else {
-            $validCompanies = CompanyConfig::where('id', 'in', $companyIds)
-                ->where('status', 1)
-                ->column('id');
+            $validCompanies = CompanyConfig::find(1);
 
             foreach ($validCompanies as $companyId) {
                 $server->addProcess(new WechatFinanceWorker($companyId, $server));
