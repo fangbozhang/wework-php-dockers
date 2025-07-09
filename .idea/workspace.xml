@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="e09475bb-a2d1-493b-aff9-03541f6948f3" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/php/supervisord.conf" beforeDir="false" afterPath="$PROJECT_DIR$/php/supervisord.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/wework/app/process/WechatFinanceManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/www/wework/app/process/WechatFinanceManager.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/wework/app/process/WechatFinanceWorker.php" beforeDir="false" afterPath="$PROJECT_DIR$/www/wework/app/process/WechatFinanceWorker.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,7 +68,7 @@
       <option name="presentableId" value="Default" />
       <updated>1750729288043</updated>
       <workItem from="1750729289131" duration="146804000" />
-      <workItem from="1751880787168" duration="11035000" />
+      <workItem from="1751880787168" duration="14967000" />
     </task>
     <task id="LOCAL-00001" summary="测试supervisord">
       <created>1751880839552</created>
@@ -83,7 +84,14 @@
       <option name="project" value="LOCAL" />
       <updated>1751937178138</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="改动配置">
+      <created>1751961363804</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1751961363804</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -102,6 +110,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="测试supervisord" />
-    <option name="LAST_COMMIT_MESSAGE" value="测试supervisord" />
+    <MESSAGE value="改动配置" />
+    <option name="LAST_COMMIT_MESSAGE" value="改动配置" />
   </component>
 </project>

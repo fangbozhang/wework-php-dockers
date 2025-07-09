@@ -4,3 +4,5 @@ collation-server=utf8mb4_unicode_ci
 default-time-zone='+8:00'
 max_connections=512
 innodb_buffer_pool_size=512M
+wait_timeout = 86400
+interactive_timeout = 86400

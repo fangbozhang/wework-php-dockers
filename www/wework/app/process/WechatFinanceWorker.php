@@ -7,6 +7,7 @@ use Swoole\Coroutine;
 use Swoole\Http\Server;
 use Swoole\Process;
 use Swoole\Server\Task;
+use think\console\Output;
 use think\facade\Db;
 use Redis;
 use WxworkFinanceSdk;
@@ -29,7 +30,8 @@ class WechatFinanceWorker extends Process {
     public function __construct($companyId, $server = null) {
         $this->companyId = $companyId;
         $this->server = $server;
-        parent::__construct("finance-worker-{$companyId}");
+        $this->output = new Output();
+        parent::__construct([$this, 'run']);
     }
 
     public static function startAllWorkers(Server $server)
@@ -42,7 +44,6 @@ class WechatFinanceWorker extends Process {
 
     public function run() {
         $this->output->info("Starting worker for company: {$this->companyId}");
-
         // 使用协程方式初始化
         go(function () {
             $this->initialize();
@@ -62,7 +63,8 @@ class WechatFinanceWorker extends Process {
     }
 
     protected function initialize() {
-        // 加载公司配置
+        $this->checkDbConnection();
+        // 加载公司配置  待用redis 优化
         $this->company = CompanyConfig::find($this->companyId);
         if (!$this->company) {
             $this->output->error("Company config not found: {$this->companyId}");
@@ -82,6 +84,20 @@ class WechatFinanceWorker extends Process {
         );
 
         $this->output->info("Worker started for company: {$this->company->corp_id}");
+    }
+    /**
+     * 检查数据库连接是否有效，无效则重建
+     */
+    protected function checkDbConnection() {
+        try {
+            // 执行简单查询测试连接（如 SELECT 1）
+            Db::query('SELECT 1');
+        } catch (\Exception $e) {
+            // 连接失效，关闭旧连接并重建
+            Db::connect()->close(); // 关闭无效连接
+            Db::connect(); // 重建连接
+            echo "MySQL connection reconnected (error: {$e->getMessage()})\n";
+        }
     }
 
     /**

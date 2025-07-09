@@ -7,6 +7,6 @@ return [
     'commands' => [
 //        \think\swoole\command\Server::class,
         'swoolews' => 'app\command\Swoolews',
-
+        'FinanceServer' => 'app\command\FinanceServer',
     ],
 ];
