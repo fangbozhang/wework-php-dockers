@@ -4,7 +4,6 @@ namespace app\process;
 
 use Swoole\Http\Server;
 use app\common\model\CompanyConfig;
-use think\facade\Db;
 
 class WechatFinanceManager {
     public static function start(Server $server, array $companyIds = null) {
