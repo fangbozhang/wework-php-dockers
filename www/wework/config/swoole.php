@@ -7,7 +7,7 @@ return [
         'port' => 9501, // 修改为9501端口
         'worker_num' => swoole_cpu_num() * 2, // 增加worker数量
         'options' => [
-            'daemonize' => true, // 调试模式关闭守护进程
+            'daemonize' => false, // 调试模式关闭守护进程
             'log_file' => runtime_path('logs/swoole.log'), // 指定日志文件
             'pid_file' => runtime_path('swoole.pid'), // PID文件
             'max_request' => 0, // 常驻进程不限制请求数

@@ -22,6 +22,7 @@ RUN apt-get update -y && \
     libtidy-dev libkrb5-dev \
     libssh2-1-dev \
     net-tools \
+    default-mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # 编译核心PHP
@@ -106,7 +107,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
     docker-php-ext-install -j$(nproc) \
         gd bcmath bz2 calendar exif ftp gettext \
         pdo_sqlite shmop snmp soap sockets sysvmsg \
-        sysvsem sysvshm tidy xmlrpc xsl zip
+        sysvsem sysvshm tidy xmlrpc xsl zip \
+        pdo_mysql
 
 # 验证扩展安装
 RUN ls -l /usr/local/lib/php/extensions/no-debug-non-zts-20190902/ \

@@ -56,7 +56,7 @@ class WechatFinanceWorker extends Process {
                     Coroutine::sleep(1);
                 } catch (\Throwable $e) {
                     $this->output->error("Process failed: " . $e->getMessage());
-                    //$this->handleException($e);
+                    $this->handleException($e);
                 }
             }
         });
@@ -72,8 +72,8 @@ class WechatFinanceWorker extends Process {
         }
 
         // 检查私钥
-        if (empty($this->company->private_key)) {
-            $this->output->error("Private key missing for company: {$this->company->corp_id}");
+        if (empty($this->company->aes_key)) {
+            $this->output->error("aes_key missing for company: {$this->company->corp_id}");
             exit(1);
         }
 
