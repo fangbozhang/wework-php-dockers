@@ -3,6 +3,7 @@
 namespace app\process;
 
 use app\common\model\CompanyConfig;
+use app\job\MessageProcessing;
 use Swoole\Coroutine;
 use Swoole\Http\Server;
 use Swoole\Process;
@@ -10,6 +11,7 @@ use Swoole\Server\Task;
 use think\console\Output;
 use think\facade\Db;
 use Redis;
+use think\facade\Queue;
 use WxworkFinanceSdk;
 use app\common\service\ChatTableCreator;
 
@@ -34,8 +36,7 @@ class WechatFinanceWorker extends Process {
         parent::__construct([$this, 'run']);
     }
 
-    public static function startAllWorkers(Server $server)
-    {
+    public static function startAllWorkers(Server $server) {
         $companyIds = CompanyConfig::where('status', 1)->column('id');
         foreach ($companyIds as $companyId) {
             $server->addProcess(new self($companyId));
@@ -85,6 +86,7 @@ class WechatFinanceWorker extends Process {
 
         $this->output->info("Worker started for company: {$this->company->corp_id}");
     }
+
     /**
      * 检查数据库连接是否有效，无效则重建
      */
@@ -130,14 +132,20 @@ class WechatFinanceWorker extends Process {
         $this->company->save();
     }
 
+    /**
+     * 处理消息
+     * @param $encryptedMsg
+     * @return void
+     * @throws \RedisException
+     */
     protected function processMessage($encryptedMsg) {
         // 消息去重
-        $msgKey = "msg:{$this->company->id}:{$encryptedMsg['msgid']}";
-        if (Redis::get($msgKey)) {
-            $this->output->info("Duplicate message: {$encryptedMsg['msgid']}");
-            return;
-        }
-        Redis::setex($msgKey, 86400, 1); // 24小时去重
+//        $msgKey = "msg:{$this->company->id}:{$encryptedMsg['msgid']}";
+//        if (Redis::get($msgKey)) {
+//            $this->output->info("Duplicate message: {$encryptedMsg['msgid']}");
+//            return;
+//        }
+//        Redis::setex($msgKey, 86400, 1); // 24小时去重
 
         // 解密随机密钥
         $decryptRandKey = null;
@@ -162,11 +170,21 @@ class WechatFinanceWorker extends Process {
             return;
         }
 
-        // 保存消息
-        $this->saveMessage($msgData, $encryptedMsg['seq']);
+        // 直接将消息入队，避免在接收进程中处理复杂逻辑
+        Queue::push(
+        MessageProcessing::class,
+            [
+                'company_id' => $this->company->id,
+                'encrypted_msg' => $msgData,
+            ],
+            'WechatMessageQueue'
+        );
 
-        // 处理媒体文件
-        $this->handleMedia($msgData, $encryptedMsg['seq']);
+//        // 保存消息
+//        $this->saveMessage($msgData, $encryptedMsg['seq']);
+//
+//        // 处理媒体文件
+//        $this->handleMedia($msgData, $encryptedMsg['seq']);
     }
 
     protected function saveMessage($msgData, $seq) {

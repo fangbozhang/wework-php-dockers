@@ -32,6 +32,7 @@ class FinanceServer extends Command {
         $http->processStatsTable = $processStatsTable;
 
         $companyIds = \think\facade\Config::get('swoole.wechat_finance.companies');
+        dd($companyIds);
         $companyIds = [1];
         if (is_string($companyIds)) {
             $companyIds = explode(',', $companyIds);

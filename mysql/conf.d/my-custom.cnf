@@ -6,3 +6,4 @@ max_connections=512
 innodb_buffer_pool_size=512M
 wait_timeout = 86400
 interactive_timeout = 86400
+explicit_defaults_for_timestamp=true
