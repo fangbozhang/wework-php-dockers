@@ -2,6 +2,7 @@
 
 namespace app\job;
 
+use app\library\RedisHelper;
 use think\facade\Db;
 use think\queue\Job;
 use app\common\model\CompanyConfig;
@@ -14,18 +15,18 @@ use app\common\service\MediaService;
  *
  */
 class MessageProcessing {
+
     public function fire(Job $job, $data) {
         try {
             $companyId = $data['company_id'];
             $msgData = $data['encrypted_msg'];
 
             // 获取公司配置
-            $company = CompanyConfig::find($companyId);
+            $company = RedisHelper::get("wework:company:config:{$companyId}");
             if (!$company) {
                 $job->delete();
                 return;
             }
-
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception("JSON decode error");
             }

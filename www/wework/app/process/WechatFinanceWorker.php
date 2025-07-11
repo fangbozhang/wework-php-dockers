@@ -4,12 +4,12 @@ namespace app\process;
 
 use app\common\model\CompanyConfig;
 use app\job\MessageProcessing;
+use app\library\RedisHelper;
 use Swoole\Coroutine;
 use Swoole\Http\Server;
 use Swoole\Process;
 use think\console\Output;
 use think\facade\Db;
-use Redis;
 use think\facade\Queue;
 use WxworkFinanceSdk;
 
@@ -21,7 +21,6 @@ class WechatFinanceWorker extends Process {
     protected $company;
     protected $sdk;
     protected $server;
-    protected $redis;
 
     // 内存阈值 (MB)
     const MEMORY_LIMIT = 100;
@@ -32,8 +31,6 @@ class WechatFinanceWorker extends Process {
         $this->companyId = $companyId;
         $this->server = $server;
         $this->output = new Output();
-        $this->redis = new Redis();
-        $this->redis->connect('118.178.230.188', 6379);
         parent::__construct([$this, 'run']);
     }
 
@@ -80,7 +77,7 @@ class WechatFinanceWorker extends Process {
      */
     protected function initialize() {
         $companyConfigKey = "wework:company:config:{$this->companyId}";
-        $companyConfig = $this->redis->get($companyConfigKey);
+        $companyConfig = RedisHelper::get($companyConfigKey);
 
         if (!$companyConfig) {
             $this->company = CompanyConfig::find($this->companyId);
@@ -88,7 +85,7 @@ class WechatFinanceWorker extends Process {
                 $this->output->error("Company config not found: {$this->companyId}");
                 exit(1);
             }
-            $this->redis->set($companyConfigKey, json_encode($this->company->toArray()));
+            RedisHelper::set($companyConfigKey, json_encode($this->company->toArray()));
         } else {
             $this->company = new CompanyConfig(json_decode($companyConfig, true));
         }
@@ -113,7 +110,7 @@ class WechatFinanceWorker extends Process {
      */
     protected function syncMessages() {
         $seqKey = "wework:company:seq:{$this->company->id}";
-        $seq = $this->redis->get($seqKey);
+        $seq = RedisHelper::get($seqKey);
         if (!$seq) {
             $seq = 0;
         }
@@ -134,7 +131,7 @@ class WechatFinanceWorker extends Process {
         // 处理每条消息
         foreach ($messages as $msg) {
             $this->processMessage($msg);
-            $this->redis->set($seqKey, $msg['seq']);
+            RedisHelper::set($seqKey, $msg['seq']);
         }
     }
 
@@ -209,7 +206,7 @@ class WechatFinanceWorker extends Process {
         $this->server->processStatsTable->set("we_process_stats", [
             'company_id' => $this->company->id,
             'pid' => $pid,
-            'last_seq' => $this->redis->get("wework:company:seq:{$this->company->id}"),
+            'last_seq' => RedisHelper::get("wework:company:seq:{$this->company->id}"),
             'memory' => $memory,
             'update_time' => time()
         ]);
