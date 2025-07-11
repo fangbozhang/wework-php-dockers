@@ -56,7 +56,6 @@ do{
                 $decryptChatRawContent = $sdk->decryptData($decryptRandKey, $val['encrypt_chat_msg']);
                 var_dump($decryptChatRawContent);
                 $j2 = json_decode($decryptChatRawContent, true);
-            
                 $msgType = $j2['msgtype'];
                      if (in_array($msgType, ['image', 'video'])) {
                         try {

@@ -7,13 +7,11 @@ use app\job\MessageProcessing;
 use Swoole\Coroutine;
 use Swoole\Http\Server;
 use Swoole\Process;
-use Swoole\Server\Task;
 use think\console\Output;
 use think\facade\Db;
 use Redis;
 use think\facade\Queue;
 use WxworkFinanceSdk;
-use app\common\service\ChatTableCreator;
 
 /**
  * 获取企业微信消息
@@ -23,6 +21,7 @@ class WechatFinanceWorker extends Process {
     protected $company;
     protected $sdk;
     protected $server;
+    protected $redis;
 
     // 内存阈值 (MB)
     const MEMORY_LIMIT = 100;
@@ -33,6 +32,8 @@ class WechatFinanceWorker extends Process {
         $this->companyId = $companyId;
         $this->server = $server;
         $this->output = new Output();
+        $this->redis = new Redis();
+        $this->redis->connect('118.178.230.188', 6379);
         parent::__construct([$this, 'run']);
     }
 
@@ -43,12 +44,18 @@ class WechatFinanceWorker extends Process {
         }
     }
 
+    /**
+     * @return void
+     * @throws \RedisException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
     public function run() {
         $this->output->info("Starting worker for company: {$this->companyId}");
         // 使用协程方式初始化
         go(function () {
             $this->initialize();
-
             while (true) {
                 try {
                     $this->syncMessages();
@@ -63,22 +70,35 @@ class WechatFinanceWorker extends Process {
         });
     }
 
+    /**
+     * 初始化配置
+     * @return void
+     * @throws \RedisException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
     protected function initialize() {
-        $this->checkDbConnection();
-        // 加载公司配置  待用redis 优化
-        $this->company = CompanyConfig::find($this->companyId);
-        if (!$this->company) {
-            $this->output->error("Company config not found: {$this->companyId}");
-            exit(1);
-        }
+        $companyConfigKey = "wework:company:config:{$this->companyId}";
+        $companyConfig = $this->redis->get($companyConfigKey);
 
+        if (!$companyConfig) {
+            $this->company = CompanyConfig::find($this->companyId);
+            if (!$this->company) {
+                $this->output->error("Company config not found: {$this->companyId}");
+                exit(1);
+            }
+            $this->redis->set($companyConfigKey, json_encode($this->company->toArray()));
+        } else {
+            $this->company = new CompanyConfig(json_decode($companyConfig, true));
+        }
         // 检查私钥
         if (empty($this->company->aes_key)) {
             $this->output->error("aes_key missing for company: {$this->company->corp_id}");
             exit(1);
         }
 
-        // 初始化SDK
+        // 初始化 SDK
         $this->sdk = new WxworkFinanceSdk(
             $this->company->corp_id,
             $this->company->corp_secret
@@ -88,26 +108,15 @@ class WechatFinanceWorker extends Process {
     }
 
     /**
-     * 检查数据库连接是否有效，无效则重建
-     */
-    protected function checkDbConnection() {
-        try {
-            // 执行简单查询测试连接（如 SELECT 1）
-            Db::query('SELECT 1');
-        } catch (\Exception $e) {
-            // 连接失效，关闭旧连接并重建
-            Db::connect()->close(); // 关闭无效连接
-            Db::connect(); // 重建连接
-            echo "MySQL connection reconnected (error: {$e->getMessage()})\n";
-        }
-    }
-
-    /**
      * 获取消息
      * @return void
      */
     protected function syncMessages() {
-        $seq = $this->company->last_seq;
+        $seqKey = "wework:company:seq:{$this->company->id}";
+        $seq = $this->redis->get($seqKey);
+        if (!$seq) {
+            $seq = 0;
+        }
         $this->output->info("Fetching messages from seq: {$seq}");
 
         // 拉取聊天数据
@@ -125,11 +134,8 @@ class WechatFinanceWorker extends Process {
         // 处理每条消息
         foreach ($messages as $msg) {
             $this->processMessage($msg);
-            $this->company->last_seq = $msg['seq'];
+            $this->redis->set($seqKey, $msg['seq']);
         }
-
-        // 保存最后序列号
-        $this->company->save();
     }
 
     /**
@@ -139,20 +145,13 @@ class WechatFinanceWorker extends Process {
      * @throws \RedisException
      */
     protected function processMessage($encryptedMsg) {
-        // 消息去重
-//        $msgKey = "msg:{$this->company->id}:{$encryptedMsg['msgid']}";
-//        if (Redis::get($msgKey)) {
-//            $this->output->info("Duplicate message: {$encryptedMsg['msgid']}");
-//            return;
-//        }
-//        Redis::setex($msgKey, 86400, 1); // 24小时去重
 
         // 解密随机密钥
         $decryptRandKey = null;
         $ok = openssl_private_decrypt(
             base64_decode($encryptedMsg['encrypt_random_key']),
             $decryptRandKey,
-            $this->company->private_key,
+            $this->company->aes_key,
             OPENSSL_PKCS1_PADDING
         );
 
@@ -172,7 +171,7 @@ class WechatFinanceWorker extends Process {
 
         // 直接将消息入队，避免在接收进程中处理复杂逻辑
         Queue::push(
-        MessageProcessing::class,
+            MessageProcessing::class,
             [
                 'company_id' => $this->company->id,
                 'encrypted_msg' => $msgData,
@@ -187,91 +186,10 @@ class WechatFinanceWorker extends Process {
 //        $this->handleMedia($msgData, $encryptedMsg['seq']);
     }
 
-    protected function saveMessage($msgData, $seq) {
-        // 确保表存在
-        if (!$this->company->chat_table) {
-            $this->company->chat_table = ChatTableCreator::create($this->company);
-            $this->company->save();
-        }
-
-        // 构建数据
-        $data = [
-            'msgid' => $msgData['msgid'] ?? '',
-            'publickey_ver' => $msgData['publickey_ver'] ?? 0,
-            'seq' => $seq,
-            'action' => $msgData['action'] ?? 'send',
-            'msgfrom' => $msgData['from'] ?? '',
-            'tolist' => is_array($msgData['tolist']) ?
-                implode(',', $msgData['tolist']) :
-                ($msgData['tolist'] ?? ''),
-            'msgtype' => $msgData['msgtype'] ?? '',
-            'msgtime' => $msgData['msgtime'] ?? 0,
-            'text' => $this->getTextContent($msgData),
-            'sdkfield' => $this->getSdkField($msgData),
-            'msgdata' => json_encode($msgData, JSON_UNESCAPED_UNICODE),
-            'status' => 1, // 默认未下载媒体
-            'media_code' => 0,
-            'media_path' => '',
-            'roomid' => $msgData['roomid'] ?? '',
-            'created_at' => date('Y-m-d H:i:s')
-        ];
-
-        // 插入数据库
-        Db::name($this->company->chat_table)->insert($data);
-        $this->output->info("Message saved: {$data['msgid']}");
-    }
-
-    protected function getTextContent($msgData) {
-        return ($msgData['msgtype'] === 'text') ?
-            ($msgData['text']['content'] ?? '') :
-            '';
-    }
-
-    protected function getSdkField($msgData) {
-        $type = $msgData['msgtype'] ?? '';
-        $mediaTypes = ['image', 'video', 'voice', 'file'];
-
-        return in_array($type, $mediaTypes) ?
-            ($msgData[$type]['sdkfileid'] ?? '') :
-            '';
-    }
-
-    protected function handleMedia($msgData, $seq) {
-        $type = $msgData['msgtype'] ?? '';
-        $mediaTypes = ['image', 'video', 'voice', 'file'];
-
-        if (!in_array($type, $mediaTypes)) {
-            return;
-        }
-
-        $sdkFileId = $msgData[$type]['sdkfileid'] ?? '';
-        if (!$sdkFileId) {
-            return;
-        }
-
-        // 投递媒体下载任务
-        Task::async(function () use ($sdkFileId, $seq, $type) {
-            $this->dispatchMediaTask($sdkFileId, $seq, $type);
-        });
-    }
-
-    protected function dispatchMediaTask($sdkFileId, $seq, $msgType) {
-        // 通过队列异步下载
-        $taskData = [
-            'company_id' => $this->company->id,
-            'sdkfileid' => $sdkFileId,
-            'seq' => $seq,
-            'msgtype' => $msgType
-        ];
-
-        // 使用ThinkPHP的队列系统
-        \think\facade\Queue::push(
-            \app\job\WechatMediaDownload::class,
-            $taskData,
-            'WechatMediaDownload'
-        );
-    }
-
+    /**
+     * php垃圾回收 清楚废物内存
+     * @return void
+     */
     protected function freeMemory() {
         $usage = memory_get_usage(true) / 1024 / 1024; // MB
         if ($usage > self::MEMORY_LIMIT) {
@@ -281,20 +199,27 @@ class WechatFinanceWorker extends Process {
         }
     }
 
+    /**
+     *  更新进程状态到Swoole Table
+     * @return void
+     */
     protected function updateStats() {
-        // 更新进程状态到Swoole Table
         $pid = getmypid();
         $memory = memory_get_usage() / 1024; // KB
-
-        $this->server->processStatsTable->set("company_{$this->company->id}", [
+        $this->server->processStatsTable->set("we_process_stats", [
             'company_id' => $this->company->id,
             'pid' => $pid,
-            'last_seq' => $this->company->last_seq,
+            'last_seq' => $this->redis->get("wework:company:seq:{$this->company->id}"),
             'memory' => $memory,
-            'updated_at' => time()
+            'update_time' => time()
         ]);
     }
 
+    /**
+     * 记录异常
+     * @param \Throwable $e
+     * @return void
+     */
     protected function handleException(\Throwable $e) {
         static $retryCount = 0;
         $retryCount++;
@@ -311,11 +236,11 @@ class WechatFinanceWorker extends Process {
         ));
 
         // 记录异常日志
-        Db::name('process_errors')->insert([
+        Db::name('we_process_errors')->insert([
             'company_id' => $this->company->id,
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
-            'occurred_at' => date('Y-m-d H:i:s')
+            'occurre_time' => date('Y-m-d H:i:s')
         ]);
 
         // 等待重试
@@ -332,4 +257,106 @@ class WechatFinanceWorker extends Process {
         // 实际部署中应该由Supervisor重启
         posix_kill(getmypid(), SIGTERM);
     }
+
+
+//    protected function saveMessage($msgData, $seq) {
+//        // 确保表存在
+//        if (!$this->company->chat_table) {
+//            $this->company->chat_table = ChatTableCreator::create($this->company);
+//            $this->company->save();
+//        }
+//
+//        // 构建数据
+//        $data = [
+//            'msgid' => $msgData['msgid'] ?? '',
+//            'publickey_ver' => $msgData['publickey_ver'] ?? 0,
+//            'seq' => $seq,
+//            'action' => $msgData['action'] ?? 'send',
+//            'msgfrom' => $msgData['from'] ?? '',
+//            'tolist' => is_array($msgData['tolist']) ?
+//                implode(',', $msgData['tolist']) :
+//                ($msgData['tolist'] ?? ''),
+//            'msgtype' => $msgData['msgtype'] ?? '',
+//            'msgtime' => $msgData['msgtime'] ?? 0,
+//            'text' => $this->getTextContent($msgData),
+//            'sdkfield' => $this->getSdkField($msgData),
+//            'msgdata' => json_encode($msgData, JSON_UNESCAPED_UNICODE),
+//            'status' => 1, // 默认未下载媒体
+//            'media_code' => 0,
+//            'media_path' => '',
+//            'roomid' => $msgData['roomid'] ?? '',
+//            'created_at' => date('Y-m-d H:i:s')
+//        ];
+//
+//        // 插入数据库
+//        Db::name($this->company->chat_table)->insert($data);
+//        $this->output->info("Message saved: {$data['msgid']}");
+//    }
+
+//    protected function getTextContent($msgData) {
+//        return ($msgData['msgtype'] === 'text') ?
+//            ($msgData['text']['content'] ?? '') :
+//            '';
+//    }
+
+//    protected function getSdkField($msgData) {
+//        $type = $msgData['msgtype'] ?? '';
+//        $mediaTypes = ['image', 'video', 'voice', 'file'];
+//
+//        return in_array($type, $mediaTypes) ?
+//            ($msgData[$type]['sdkfileid'] ?? '') :
+//            '';
+//    }
+
+//    protected function handleMedia($msgData, $seq) {
+//        $type = $msgData['msgtype'] ?? '';
+//        $mediaTypes = ['image', 'video', 'voice', 'file'];
+//
+//        if (!in_array($type, $mediaTypes)) {
+//            return;
+//        }
+//
+//        $sdkFileId = $msgData[$type]['sdkfileid'] ?? '';
+//        if (!$sdkFileId) {
+//            return;
+//        }
+//
+//        // 投递媒体下载任务
+//        Task::async(function () use ($sdkFileId, $seq, $type) {
+//            $this->dispatchMediaTask($sdkFileId, $seq, $type);
+//        });
+//    }
+
+//    protected function dispatchMediaTask($sdkFileId, $seq, $msgType) {
+//        // 通过队列异步下载
+//        $taskData = [
+//            'company_id' => $this->company->id,
+//            'sdkfileid' => $sdkFileId,
+//            'seq' => $seq,
+//            'msgtype' => $msgType
+//        ];
+//
+//        // 使用ThinkPHP的队列系统
+//        \think\facade\Queue::push(
+//            \app\job\WechatMediaDownload::class,
+//            $taskData,
+//            'WechatMediaDownload'
+//        );
+//    }
+
+//    /**
+//     * 检查数据库连接是否有效，无效则重建
+//     */
+//    protected function checkDbConnection() {
+//        try {
+//            // 执行简单查询测试连接（如 SELECT 1）
+//            Db::query('SELECT 1');
+//        } catch (\Exception $e) {
+//            // 连接失效，关闭旧连接并重建
+//            Db::connect()->close(); // 关闭无效连接
+//            Db::connect(); // 重建连接
+//            echo "MySQL connection reconnected (error: {$e->getMessage()})\n";
+//        }
+//    }
+
 }

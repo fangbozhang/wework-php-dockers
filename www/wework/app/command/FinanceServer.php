@@ -26,7 +26,7 @@ class FinanceServer extends Command {
         $processStatsTable->column('pid', Table::TYPE_INT);
         $processStatsTable->column('last_seq', Table::TYPE_INT, 8);
         $processStatsTable->column('memory', Table::TYPE_INT);
-        $processStatsTable->column('updated_at', Table::TYPE_INT);
+        $processStatsTable->column('update_time', Table::TYPE_INT);
         $processStatsTable->create();
 
         $http->processStatsTable = $processStatsTable;
